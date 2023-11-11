@@ -7,8 +7,26 @@ import {
   faPenToSquare
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Dispatch, SetStateAction, useContext } from 'react'
+import UserContext from '../../Context/user-context'
 
-const Account = () => {
+const Account = (props: {
+  setIsModalOpen: Dispatch<SetStateAction<boolean>>
+  setModalType: Dispatch<SetStateAction<string>>
+}) => {
+  // props
+  const { setModalType, setIsModalOpen } = props
+
+  // context
+  const userContext = useContext(UserContext)
+  const { handleLogout } = userContext
+
+  const onLogout = async () => {
+    await handleLogout()
+    setModalType('')
+    setIsModalOpen(false)
+  }
+
   return (
     <div className='account-modal w-full h-full pt-6 flex flex-col'>
       <div className='account-modal__group'>
@@ -23,7 +41,7 @@ const Account = () => {
               <span>Write</span>
             </Link>
           </li>
-          <li>
+          <li className='block sm:hidden'>
             <button type='button' className='header__link'>
               <FontAwesomeIcon
                 icon={faMagnifyingGlass}
@@ -59,7 +77,11 @@ const Account = () => {
       <div className='account-modal__group'>
         <ul className='flex flex-col gap-4'>
           <li>
-            <button type='button' className='header__link'>
+            <button
+              type='button'
+              onClick={() => onLogout()}
+              className='header__link'
+            >
               <span>Sign out</span>
             </button>
           </li>

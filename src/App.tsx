@@ -1,10 +1,6 @@
 // react
 import { useEffect } from 'react'
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes
-} from 'react-router-dom'
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 
 // library
 import {
@@ -22,6 +18,7 @@ import {
 import { db } from './Utils/firebase'
 import GlobalLayout from './Components/Layouts/GlobalLayout'
 import { UserProvider } from './Context/user-context'
+import WriteStory from './Routes/WriteStory'
 
 function App() {
   useEffect(() => {}, [])
@@ -65,7 +62,9 @@ function App() {
     <Router>
       <UserProvider>
         <Routes>
-          <Route path='/' element={<GlobalLayout />}></Route>
+          <Route path='/' element={<GlobalLayout />}>
+            <Route path='write-story' element={<WriteStory />} />
+          </Route>
         </Routes>
       </UserProvider>
     </Router>

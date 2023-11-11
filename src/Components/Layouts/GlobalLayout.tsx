@@ -13,7 +13,12 @@ import UserContext from '../../Context/user-context'
 const GlobalLayout = () => {
   // context
   const userContext = useContext(UserContext)
-  const { isLoginModalOpen, loginModalType, toggleLoginModal, setLoginModalType } = userContext
+  const {
+    isLoginModalOpen,
+    loginModalType,
+    toggleLoginModal,
+    setLoginModalType
+  } = userContext
 
   return (
     <>
@@ -33,9 +38,10 @@ const GlobalLayout = () => {
         <Modal
           type={loginModalType}
           toggleModal={toggleLoginModal}
-          classes="top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] h-full md:h-auto w-full md:max-w-[680px]"
+          classes='top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] h-full md:h-[650px] w-full md:max-w-[680px]'
           isCloseButton={true}
           setModalType={setLoginModalType}
+          setIsModalOpen={() => {}}
         />
       </CSSTransition>
       <CSSTransition

@@ -12,7 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 // src
 import UserContext from '../../Context/user-context'
-import useModal from '../Hooks/useModal'
+import useModal from '../../Hooks/useModal'
 import Modal from '../UI/Modal'
 
 const Header = (props: { toggleModal: Function }) => {
@@ -20,15 +20,15 @@ const Header = (props: { toggleModal: Function }) => {
   const { toggleModal } = props
   // context
   const userContext = useContext(UserContext)
-  const { isSignedIn, setIsSignedIn, handleLogout } = userContext
+  const { isSignedIn } = userContext
 
   // hooks
-  const navigate = useNavigate()
   const {
     isModalOpen: isAccountModalOpen,
     modalType: accountModalType,
     toggleModal: toggleAccountModal,
-    setModalType: setAccountModalType
+    setModalType: setAccountModalType,
+    setIsModalOpen: setIsAccountModalOpen
   } = useModal()
 
   return (
@@ -99,7 +99,7 @@ const Header = (props: { toggleModal: Function }) => {
                   <>
                     <button
                       type='button'
-                      onClick={() => toggleAccountModal('account')}
+                      onClick={() => toggleAccountModal(isAccountModalOpen ? '' : 'account')}
                       className='header__link'
                     >
                       <FontAwesomeIcon
@@ -117,6 +117,7 @@ const Header = (props: { toggleModal: Function }) => {
                         classes='top-[calc(100%+10px)] min-w-[250px] right-0'
                         isCloseButton={false}
                         setModalType={setAccountModalType}
+                        setIsModalOpen={setIsAccountModalOpen}
                       />
                     )}
                   </>

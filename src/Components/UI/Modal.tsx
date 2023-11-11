@@ -10,6 +10,7 @@ import SignIn from '../Modal/SignIn'
 import Card from './Card'
 import SignInForm from '../Modal/SignInForm'
 import Account from '../Modal/Account'
+import Message from '../Modal/Message'
 
 const Modal = (props: {
   type: string
@@ -17,12 +18,13 @@ const Modal = (props: {
   classes: string
   isCloseButton: boolean
   setModalType: Dispatch<SetStateAction<string>>
+  setIsModalOpen: Dispatch<SetStateAction<boolean>>
 }) => {
-  const { type, toggleModal, setModalType, classes, isCloseButton } = props
+  const { type, toggleModal, setModalType, classes, isCloseButton, setIsModalOpen } = props
 
   return (
-    <div className={`absolute bg-white z-10 ${classes}`}>
-      <Card classes='w-full h-full flex items-center justify-center relative md:min-h-[650px]'>
+    <div className={`absolute bg-white z-10  ${classes}`}>
+      <Card classes='w-full h-full flex items-center justify-center relative'>
         <>
           {isCloseButton && (
             <button
@@ -48,7 +50,10 @@ const Modal = (props: {
             type === 'sign-up-form-email') && (
             <SignInForm type={type} setModalType={setModalType} />
           )}
-          {type === 'account' && <Account />}
+          {type === 'sent-link' && (
+            <Message type={type} toggleModal={toggleModal} />
+          )}
+          {type === 'account' && <Account setIsModalOpen={setIsModalOpen} setModalType={setModalType} />}
         </>
       </Card>
     </div>

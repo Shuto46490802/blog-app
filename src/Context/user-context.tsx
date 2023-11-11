@@ -9,6 +9,7 @@ import {
 
 // library
 import {
+  createUserWithEmailAndPassword,
   isSignInWithEmailLink,
   onAuthStateChanged,
   sendSignInLinkToEmail,
@@ -17,7 +18,7 @@ import {
   signOut
 } from '@firebase/auth'
 import { auth, signInWithGooglePopup } from '../Utils/firebase'
-import useModal from '../Components/Hooks/useModal'
+import useModal from '../Hooks/useModal'
 import { useNavigate } from 'react-router-dom'
 
 //src
@@ -33,6 +34,7 @@ type ContextType = {
   handleGoogleSignin: Function
   handleSignInEmailPassword: Function
   handleSignInEmail: Function
+  handleSignUpEmailPassword: Function
   handleLogout: Function
 }
 
@@ -47,6 +49,7 @@ const UserContext = createContext<ContextType>({
   handleGoogleSignin: () => {},
   handleSignInEmailPassword: () => {},
   handleSignInEmail: () => {},
+  handleSignUpEmailPassword: () => {},
   handleLogout: () => {}
 })
 
@@ -58,6 +61,7 @@ export const UserProvider = (props: { children: JSX.Element }) => {
     isModalOpen: isLoginModalOpen,
     modalType: loginModalType,
     setModalType: setLoginModalType,
+    setIsModalOpen: setIsLoginModalOpen,
     toggleModal: toggleLoginModal
   } = useModal()
   const navigate = useNavigate()
@@ -65,7 +69,6 @@ export const UserProvider = (props: { children: JSX.Element }) => {
   useEffect(() => {
     const uid = localStorage.getItem('uid') || ''
     if (uid) setIsSignedIn(true)
-    console.log(uid)
     handleAuthStateChange(uid)
   }, [isSignedIn])
 
@@ -75,13 +78,18 @@ export const UserProvider = (props: { children: JSX.Element }) => {
 
   // auth observer
   const handleAuthStateChange = (uid: string) => {
-    onAuthStateChanged(auth, async (user) => {
+    onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user)
+
+        if (!uid) {
+          localStorage.setItem('uid', uid)
+          setIsSignedIn(true)
+        }
       } else {
         if (uid) {
-          toggleLoginModal('sign-in-options')
           localStorage.removeItem('uid')
+          setIsSignedIn(false)
         }
       }
     })
@@ -90,9 +98,9 @@ export const UserProvider = (props: { children: JSX.Element }) => {
   const handleGoogleSignin = () => {
     signInWithGooglePopup()
       .then((res) => {
+        toggleLoginModal()
         localStorage.setItem('uid', res.user.uid)
         setIsSignedIn(true)
-        toggleLoginModal()
       })
       .catch((error) => {
         console.log(error)
@@ -125,33 +133,60 @@ export const UserProvider = (props: { children: JSX.Element }) => {
     }
   }
 
-  const handleSignInEmailPassword = (email: string, password: string) => {
-    signInWithEmailAndPassword(auth, email, password)
+  const handleSignInEmailPassword = async (email: string, password: string) => {
+    return await signInWithEmailAndPassword(auth, email, password)
       .then((res) => {
-        console.log(res)
+        localStorage.setItem('uid', res.user.uid)
+        setIsSignedIn(true)
+        toggleLoginModal()
+
+        return {
+          status: true
+        }
       })
       .catch((error) => {
         console.log(error)
+
+        return {
+          status: false,
+          error
+        }
       })
   }
 
-  const handleSignInEmail = async (email: string) => {
+  const handleSignInEmail = (email: string) => {
     const actionCodeSettings = {
       url: window.location.href,
       handleCodeInApp: true
     }
-    sendSignInLinkToEmail(auth, email, actionCodeSettings)
-      .then((res) => {
-        localStorage.setItem('emailForSignIn', email)
-      })
-      .catch((error) => console.log(error))
+    return sendSignInLinkToEmail(auth, email, actionCodeSettings)
   }
 
   // sign up
+  const handleSignUpEmailPassword = async (email: string, password: string) => {
+    return await createUserWithEmailAndPassword(auth, email, password)
+      .then((res) => {
+        localStorage.setItem('uid', res.user.uid)
+        setIsSignedIn(true)
+        toggleLoginModal()
+
+        return {
+          status: true
+        }
+      })
+      .catch((error) => {
+        console.log(error)
+
+        return {
+          status: false,
+          error
+        }
+      })
+  }
 
   //sign out
-  const handleLogout = () => {
-    signOut(auth)
+  const handleLogout = async () => {
+    await signOut(auth)
       .then(() => {
         navigate('/')
         setIsSignedIn(false)
@@ -160,6 +195,9 @@ export const UserProvider = (props: { children: JSX.Element }) => {
       .catch((error) => {
         console.log(error)
       })
+
+    setLoginModalType('')
+    setIsLoginModalOpen(false)
   }
 
   return (
@@ -177,6 +215,7 @@ export const UserProvider = (props: { children: JSX.Element }) => {
         handleGoogleSignin,
         handleSignInEmailPassword,
         handleSignInEmail,
+        handleSignUpEmailPassword,
         handleLogout
       }}
     >

@@ -14,16 +14,14 @@ const useModal = () => {
 
   const toggleModal = (type: string = '') => {
     setIsModalOpen((prev) => !prev)
-
-    if (type) {
-      setModalType(type)
-    }
+    setModalType(type)
   }
 
   return {
     isModalOpen,
     modalType,
 
+    setIsModalOpen,
     setModalType,
     toggleModal
   }
