@@ -5,6 +5,7 @@ import ReactDOM from 'react-dom/client'
 import reportWebVitals from './reportWebVitals'
 import './index.css'
 import './Styles/animations.scss'
+import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'
 import './Styles/global.scss'
 import App from './App'
 

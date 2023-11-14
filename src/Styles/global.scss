@@ -119,3 +119,15 @@ button {
     font-size: 1.25rem;
   }
 }
+
+.rdw-editor-toolbar {
+  @apply flex items-center gap-3 absolute bg-gray-700 text-white m-0 px-3 py-2 rounded;
+}
+
+[aria-label*=-control], [aria-label*=-picker] {
+  display: none !important;
+}
+
+.public-DraftStyleDefault-block.public-DraftStyleDefault-ltr {
+  margin: 0 !important;
+}

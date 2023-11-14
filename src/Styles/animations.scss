@@ -44,6 +44,26 @@
   }
 }
 
+.toolbar {
+  &-enter {
+    transform: translate3d(0, 10px, 0);
+
+    &-active {
+      transform: translate3d(0, 0, 0);
+      transition: all 0.1s;
+    }
+  }
+
+  &-exit {
+    transform: translate3d(0, 0, 0);
+
+    &-active {
+      transform: translate3d(0, 10px, 0);
+      transition: all 0.1s;
+    }
+  }
+}
+
 .loader {
   display: flex;
 
