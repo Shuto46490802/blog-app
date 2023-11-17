@@ -129,6 +129,10 @@ button {
 .rdw-editor-toolbar {
   @apply items-center gap-3 fixed bg-gray-700 text-white m-0 px-3 py-2 rounded z-10 hidden;
 
+  div:first-of-type {
+    display: none !important
+  }
+
   &.active {
     @apply flex;
   }

@@ -1,8 +1,6 @@
 // react
 import {
-  Dispatch,
   KeyboardEvent,
-  SetStateAction,
   useEffect,
   useRef,
   useState
@@ -11,29 +9,21 @@ import {
 // library
 import { faXmark } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { EditorState, SelectionState } from 'draft-js'
-
-// src
-import { onAddLink } from './LinkButton'
 
 const UrlInput = (props: {
   resetToolbar: Function
   focus: boolean
-  editorState: EditorState
-  setEditorState: Dispatch<SetStateAction<EditorState>>
   closeUrlInput: Function
-  getStylesOnSelection: Function
   isToolbarOpen: boolean
+  handleEnterLink: Function
 }) => {
   // props
   const {
     resetToolbar,
     focus,
-    editorState,
-    setEditorState,
     closeUrlInput,
-    getStylesOnSelection,
-    isToolbarOpen
+    isToolbarOpen,
+    handleEnterLink
   } = props
 
   // ref
@@ -50,11 +40,8 @@ const UrlInput = (props: {
 
   const handleEnter = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.code === 'Enter') {
-      const newState = onAddLink(editorState, input)
-      setEditorState(newState)
-      resetToolbar()
+      handleEnterLink(input)
       setInput('')
-      getStylesOnSelection(newState)
     }
   }
 

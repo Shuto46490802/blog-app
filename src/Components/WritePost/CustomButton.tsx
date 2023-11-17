@@ -1,5 +1,5 @@
 // react
-import { Dispatch, MouseEvent, SetStateAction } from 'react'
+import { MouseEvent } from 'react'
 
 // library
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -10,26 +10,22 @@ import {
   faLink,
   faQuoteLeft
 } from '@fortawesome/free-solid-svg-icons'
-import { EditorState, RichUtils } from 'draft-js'
-import { removeLink } from './LinkButton'
 
 const CustomButton = (props: {
   type: string
-  editorState: EditorState
-  classes: string
-  setEditorState: Dispatch<SetStateAction<EditorState>>
-  setToolbarMode: Dispatch<SetStateAction<string>>
-  getStylesOnSelection: Function
+  classes?: string
   isSelected: boolean
+  toggleInlineStyle?: Function
+  handleLink?: Function
+  toggleBlockType?: Function
 }) => {
   const {
     type,
-    editorState,
-    setEditorState,
     classes,
-    setToolbarMode,
-    getStylesOnSelection,
-    isSelected
+    isSelected,
+    toggleInlineStyle,
+    handleLink,
+    toggleBlockType
   } = props
 
   const getIcon = () => {
@@ -39,7 +35,7 @@ const CustomButton = (props: {
           <FontAwesomeIcon
             icon={faBold}
             size='lg'
-            className={`${isSelected && 'text-green-700'}`}
+            className={`${isSelected && 'text-green-300'}`}
           />
         )
       case 'italic':
@@ -47,7 +43,7 @@ const CustomButton = (props: {
           <FontAwesomeIcon
             icon={faItalic}
             size='lg'
-            className={`${isSelected && 'text-green-700'}`}
+            className={`${isSelected && 'text-green-300'}`}
           />
         )
       case 'link':
@@ -55,7 +51,7 @@ const CustomButton = (props: {
           <FontAwesomeIcon
             icon={faLink}
             size='lg'
-            className={`${isSelected && 'text-green-700'}`}
+            className={`${isSelected && 'text-green-300'}`}
           />
         )
       case 'header-three':
@@ -63,7 +59,7 @@ const CustomButton = (props: {
           <FontAwesomeIcon
             icon={faFont}
             size='xl'
-            className={`${isSelected && 'text-green-700'}`}
+            className={`${isSelected && 'text-green-300'}`}
           />
         )
       case 'header-four':
@@ -71,7 +67,7 @@ const CustomButton = (props: {
           <FontAwesomeIcon
             icon={faFont}
             size='lg'
-            className={`${isSelected && 'text-green-700'}`}
+            className={`${isSelected && 'text-green-300'}`}
           />
         )
       case 'blockquote':
@@ -79,7 +75,7 @@ const CustomButton = (props: {
           <FontAwesomeIcon
             icon={faQuoteLeft}
             size='lg'
-            className={`${isSelected && 'text-green-700'}`}
+            className={`${isSelected && 'text-green-300'}`}
           />
         )
     }
@@ -90,41 +86,17 @@ const CustomButton = (props: {
 
     switch (type.toLowerCase()) {
       case 'bold':
-        return toggleInlineStyle()
+        return toggleInlineStyle?.(type)
       case 'italic':
-        return toggleInlineStyle()
+        return toggleInlineStyle?.(type)
       case 'link':
-        return handleLink()
+        return handleLink?.()
       case 'header-three':
-        return toggleBlockType()
+        return toggleBlockType?.(type)
       case 'header-four':
-        return toggleBlockType()
+        return toggleBlockType?.(type)
       case 'blockquote':
-        return toggleBlockType()
-    }
-  }
-
-  const toggleInlineStyle = () => {
-    const newState = RichUtils.toggleInlineStyle(editorState, type)
-
-    getStylesOnSelection(newState)
-    setEditorState(newState)
-  }
-
-  const toggleBlockType = () => {
-    const newState = RichUtils.toggleBlockType(editorState, type)
-
-    getStylesOnSelection(newState)
-    setEditorState(newState)
-  }
-
-  const handleLink = () => {
-    if (RichUtils.currentBlockContainsLink(editorState)) {
-      const newState = removeLink(editorState)
-      setEditorState(newState)
-      getStylesOnSelection(newState)
-    } else {
-      setToolbarMode('link-mode')
+        return toggleBlockType?.(type)
     }
   }
 

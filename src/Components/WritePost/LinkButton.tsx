@@ -23,18 +23,18 @@ export const Link = (props: {
 
   useEffect(() => {
     if (isShowPopup) {
-      if (anchorRef.current && popupRef.current) {
-        const rect = anchorRef.current.getBoundingClientRect()
-        const top = rect.top + popupRef.current.clientHeight - 2
-        const left =
-          rect.left - popupRef.current.clientWidth / 2 + rect.width / 2
-        popupRef.current.setAttribute(
-          'style',
-          `top: ${top}px; left: ${left}px;`
-        )
-      }
+      getPopupPosition()
     }
   }, [isShowPopup])
+
+  const getPopupPosition = () => {
+    if (anchorRef.current && popupRef.current) {
+      const rect = anchorRef.current.getBoundingClientRect()
+      const top = rect.top + rect.height
+      const left = rect.left - popupRef.current.clientWidth / 2 + rect.width / 2
+      popupRef.current.setAttribute('style', `top: ${top}px; left: ${left}px;`)
+    }
+  }
 
   return (
     <>

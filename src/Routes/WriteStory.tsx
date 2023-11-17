@@ -1,5 +1,5 @@
 // react
-import { RefObject, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 // library
 import {
@@ -11,19 +11,18 @@ import {
   Modifier,
   SelectionState
 } from 'draft-js'
-import {
-  ContentState,
-  Editor,
-  EditorProps,
-  RawDraftContentState,
-  SyntheticKeyboardEvent
-} from 'react-draft-wysiwyg'
+import { Editor, SyntheticKeyboardEvent } from 'react-draft-wysiwyg'
 import draftToHtml from 'draftjs-to-html'
 
 // src
 import TagsInput from '../Components/WritePost/TagsInput'
 import CustomButton from '../Components/WritePost/CustomButton'
-import { Link, findLinkEntities } from '../Components/WritePost/LinkButton'
+import {
+  Link,
+  findLinkEntities,
+  onAddLink,
+  removeLink
+} from '../Components/WritePost/LinkButton'
 import UrlInput from '../Components/WritePost/UrlInput'
 
 type SelectedTypes = {
@@ -63,22 +62,7 @@ const WriteStory = () => {
 
   useEffect(() => {
     if (isToolbarOpen) {
-      const currentSelection = window.getSelection()
-
-      if (currentSelection) {
-        const range = currentSelection.getRangeAt(0)
-        const rect = range.getBoundingClientRect()
-
-        if (toolbarRef.current) {
-          const top = rect.top - toolbarRef.current.clientHeight - 7
-          const left =
-            rect.left - toolbarRef.current.clientWidth / 2 + rect.width / 2
-          toolbarRef.current.setAttribute(
-            'style',
-            `top: ${top}px; left: ${left}px;`
-          )
-        }
-      }
+      getToolbarPosition()
     }
   }, [isToolbarOpen])
 
@@ -201,6 +185,57 @@ const WriteStory = () => {
     return getDefaultKeyBinding(e)
   }
 
+  const toggleInlineStyle = (type: string) => {
+    const newState = RichUtils.toggleInlineStyle(editorState, type)
+
+    getStylesOnSelection(newState)
+    setEditorState(newState)
+  }
+
+  const toggleBlockType = (type: string) => {
+    const newState = RichUtils.toggleBlockType(editorState, type)
+
+    getStylesOnSelection(newState)
+    setEditorState(newState)
+  }
+
+  const handleClickLink = () => {
+    if (RichUtils.currentBlockContainsLink(editorState)) {
+      const newState = removeLink(editorState)
+      setEditorState(newState)
+      getStylesOnSelection(newState)
+    } else {
+      setToolbarMode('link-mode')
+    }
+  }
+
+  const handleEnterLink = (input: string) => {
+    const newState = onAddLink(editorState, input)
+    setEditorState(newState)
+    resetToolbar()
+    getStylesOnSelection(newState)
+  }
+
+  // get toolbar position
+  const getToolbarPosition = () => {
+    const currentSelection = window.getSelection()
+
+    if (currentSelection) {
+      const range = currentSelection.getRangeAt(0)
+      const rect = range.getBoundingClientRect()
+
+      if (toolbarRef.current) {
+        const top = rect.top - toolbarRef.current.clientHeight - 7
+        const left =
+          rect.left - toolbarRef.current.clientWidth / 2 + rect.width / 2
+        toolbarRef.current.setAttribute(
+          'style',
+          `top: ${top}px; left: ${left}px;`
+        )
+      }
+    }
+  }
+
   // helpers
   const removeBlock = (focusOffset: number) => {
     const selection = editorState.getSelection()
@@ -289,47 +324,6 @@ const WriteStory = () => {
               resetToolbar()
             }
           }}
-          toolbar={{
-            inline: {
-              className: '!hidden'
-            },
-            blockType: {
-              className: '!hidden'
-            },
-            list: {
-              className: '!hidden'
-            },
-            textAlign: {
-              className: '!hidden'
-            },
-            link: {
-              className: '!hidden'
-            },
-            embedded: {
-              className: '!hidden'
-            },
-            emoji: {
-              className: '!hidden'
-            },
-            image: {
-              className: '!hidden'
-            },
-            remove: {
-              className: '!hidden'
-            },
-            history: {
-              className: '!hidden'
-            },
-            fontFamily: {
-              className: '!hidden'
-            },
-            fontSize: {
-              className: '!hidden'
-            },
-            colorPicker: {
-              className: '!hidden'
-            }
-          }}
           handleKeyCommand={handleKeyCommand}
           toolbarClassName={`${isToolbarOpen ? 'active' : ''} ${
             toolbarMode ? toolbarMode : ''
@@ -343,66 +337,41 @@ const WriteStory = () => {
           toolbarCustomButtons={[
             <CustomButton
               type='BOLD'
-              editorState={editorState}
-              setEditorState={setEditorState}
-              classes=''
-              setToolbarMode={setToolbarMode}
-              getStylesOnSelection={getStylesOnSelection}
               isSelected={currentSelectedTypes['BOLD']}
+              toggleInlineStyle={toggleInlineStyle}
             />,
             <CustomButton
               type='ITALIC'
-              editorState={editorState}
-              setEditorState={setEditorState}
-              classes=''
-              setToolbarMode={setToolbarMode}
-              getStylesOnSelection={getStylesOnSelection}
               isSelected={currentSelectedTypes['ITALIC']}
+              toggleInlineStyle={toggleInlineStyle}
             />,
             <CustomButton
               type='link'
-              editorState={editorState}
-              setEditorState={setEditorState}
               classes='border-r border-gray-500 pr-2'
-              setToolbarMode={setToolbarMode}
-              getStylesOnSelection={getStylesOnSelection}
               isSelected={currentSelectedTypes['link']}
+              handleLink={handleClickLink}
             />,
             <CustomButton
               type='header-three'
-              editorState={editorState}
-              setEditorState={setEditorState}
-              classes=''
-              setToolbarMode={setToolbarMode}
-              getStylesOnSelection={getStylesOnSelection}
               isSelected={currentSelectedTypes['header-three']}
+              toggleBlockType={toggleBlockType}
             />,
             <CustomButton
               type='header-four'
-              editorState={editorState}
-              setEditorState={setEditorState}
-              classes=''
-              setToolbarMode={setToolbarMode}
-              getStylesOnSelection={getStylesOnSelection}
               isSelected={currentSelectedTypes['header-four']}
+              toggleBlockType={toggleBlockType}
             />,
             <CustomButton
               type='blockquote'
-              editorState={editorState}
-              setEditorState={setEditorState}
-              classes=''
-              setToolbarMode={setToolbarMode}
-              getStylesOnSelection={getStylesOnSelection}
               isSelected={currentSelectedTypes['blockquote']}
+              toggleBlockType={toggleBlockType}
             />,
             <UrlInput
               resetToolbar={resetToolbar}
               focus={toolbarMode === 'link-mode'}
-              editorState={editorState}
-              setEditorState={setEditorState}
               closeUrlInput={closeUrlInput}
-              getStylesOnSelection={getStylesOnSelection}
               isToolbarOpen={isToolbarOpen}
+              handleEnterLink={handleEnterLink}
             />
           ]}
           {...props}
