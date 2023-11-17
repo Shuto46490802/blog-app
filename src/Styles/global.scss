@@ -118,13 +118,48 @@ button {
   div:not(h3 div, h4 div) {
     font-size: 1.25rem;
   }
+
+  a {
+    @apply underline decoration-1;
+  }
+
+  
 }
 
 .rdw-editor-toolbar {
-  @apply flex items-center gap-3 absolute bg-gray-700 text-white m-0 px-3 py-2 rounded;
+  @apply items-center gap-3 fixed bg-gray-700 text-white m-0 px-3 py-2 rounded z-10 hidden;
+
+  &.active {
+    @apply flex;
+  }
+
+  &:after {
+    @apply content-[''] absolute border border-[7px] border-b-0 border-t-gray-700 bottom-[-7px] left-1/2 ml-[-7px];
+  }
+
+  .url-input {
+    display: none;
+  }
+
+  &.link-mode {
+    .url-input {
+      display: block;
+    }
+
+    .custom-button {
+      display: none;
+    }
+  }
 }
 
-[aria-label*=-control], [aria-label*=-picker] {
+.link-popup {
+  &:after {
+    @apply content-[''] absolute border border-[5px] border-t-0 border-b-gray-700 top-[-5px] left-1/2 ml-[-5px];
+  }
+}
+
+[aria-label*='-control'],
+[aria-label*='-picker'] {
   display: none !important;
 }
 

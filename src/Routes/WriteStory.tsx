@@ -1,5 +1,5 @@
 // react
-import { useEffect, useRef, useState } from 'react'
+import { RefObject, useEffect, useRef, useState } from 'react'
 
 // library
 import {
@@ -14,6 +14,7 @@ import {
 import {
   ContentState,
   Editor,
+  EditorProps,
   RawDraftContentState,
   SyntheticKeyboardEvent
 } from 'react-draft-wysiwyg'
@@ -22,17 +23,35 @@ import draftToHtml from 'draftjs-to-html'
 // src
 import TagsInput from '../Components/WritePost/TagsInput'
 import CustomButton from '../Components/WritePost/CustomButton'
-import { createLinkDecorator } from '../Components/WritePost/LinkButton'
+import { Link, findLinkEntities } from '../Components/WritePost/LinkButton'
+import UrlInput from '../Components/WritePost/UrlInput'
+
+type SelectedTypes = {
+  BOLD: boolean
+  ITALIC: boolean
+  link: boolean
+  'header-three': boolean
+  'header-four': boolean
+  blockquote: boolean
+}
+
+const initialSelectedTypes: SelectedTypes = {
+  BOLD: false,
+  ITALIC: false,
+  link: false,
+  'header-three': false,
+  'header-four': false,
+  blockquote: false
+}
 
 const WriteStory = () => {
-  const decorator = createLinkDecorator()
-
   // hooks
   const [tags, setTags] = useState<string[]>([])
-  const [editorState, setEditorState] = useState(
-    EditorState.createEmpty(decorator)
-  )
+  const [editorState, setEditorState] = useState(EditorState.createEmpty())
   const [isToolbarOpen, setIsToolbarOpen] = useState(false)
+  const [toolbarMode, setToolbarMode] = useState('')
+  const [currentSelectedTypes, setCurrentSelectedTypes] =
+    useState(initialSelectedTypes)
 
   // ref
   const toolbarRef = useRef<Element>()
@@ -50,7 +69,15 @@ const WriteStory = () => {
         const range = currentSelection.getRangeAt(0)
         const rect = range.getBoundingClientRect()
 
-        toolbarRef.current?.setAttribute('style', `top: ${rect.top}px;`)
+        if (toolbarRef.current) {
+          const top = rect.top - toolbarRef.current.clientHeight - 7
+          const left =
+            rect.left - toolbarRef.current.clientWidth / 2 + rect.width / 2
+          toolbarRef.current.setAttribute(
+            'style',
+            `top: ${top}px; left: ${left}px;`
+          )
+        }
       }
     }
   }, [isToolbarOpen])
@@ -65,6 +92,7 @@ const WriteStory = () => {
     setTags((prev) => prev.filter((tag) => tag !== val))
   }
 
+  // editor change observer
   const handleEditorChange = (editorState: EditorState) => {
     const selection = getCurrentTextSelection(editorState)
     const globalSelection = window?.getSelection()?.toString()
@@ -72,12 +100,45 @@ const WriteStory = () => {
     if (selection && selection === globalSelection) {
       setIsToolbarOpen(true)
     } else {
-      setIsToolbarOpen(false)
+      if (toolbarMode !== 'link-mode') {
+        resetToolbar()
+      }
+    }
+
+    if (selection) {
+      getStylesOnSelection(editorState)
     }
 
     setEditorState(editorState)
   }
 
+  // get currently selected styles on the current slection
+  const getStylesOnSelection = (state: EditorState) => {
+    const types = Object.keys(initialSelectedTypes)
+    let selectedTypes = initialSelectedTypes
+    types.forEach((type) => {
+      if (type === 'link') {
+        selectedTypes = {
+          ...selectedTypes,
+          link: RichUtils.currentBlockContainsLink(state)
+        }
+      } else {
+        const isSelected = [
+          RichUtils.getCurrentBlockType(state) === type,
+          state.getCurrentInlineStyle().has(type)
+        ].some((boolean) => boolean)
+
+        selectedTypes = {
+          ...selectedTypes,
+          [type]: isSelected
+        }
+      }
+    })
+
+    setCurrentSelectedTypes(selectedTypes)
+  }
+
+  // custom buttons
   const handleKeyCommand = (
     command: string,
     editorState: EditorState
@@ -140,6 +201,7 @@ const WriteStory = () => {
     return getDefaultKeyBinding(e)
   }
 
+  // helpers
   const removeBlock = (focusOffset: number) => {
     const selection = editorState.getSelection()
     const contentState = editorState.getCurrentContent()
@@ -177,8 +239,23 @@ const WriteStory = () => {
     const start = selectionState.getStartOffset()
     const end = selectionState.getEndOffset()
     const selectedText = currentContentBlock.getText().slice(start, end)
-  
+
     return selectedText
+  }
+
+  const resetToolbar = (close: boolean = true) => {
+    if (close) {
+      setIsToolbarOpen(false)
+    }
+    setToolbarMode('')
+  }
+
+  const closeUrlInput = () => {
+    resetToolbar(false)
+    const selection = editorState.getSelection()
+
+    const newState = EditorState.forceSelection(editorState, selection)
+    setEditorState(newState)
   }
 
   const props = {
@@ -186,7 +263,7 @@ const WriteStory = () => {
   }
 
   return (
-    <div className='container flex justify-center font-serif'>
+    <div className='editor-root container flex justify-center font-serif'>
       <div className='md:max-w-[740px] w-full mt-10 '>
         <div className='mb-2'>
           <input
@@ -208,14 +285,15 @@ const WriteStory = () => {
           placeholder='Tell your story...'
           onEditorStateChange={handleEditorChange}
           onBlur={() => {
-            setIsToolbarOpen(false)
+            if (toolbarMode !== 'link-mode' && !isToolbarOpen) {
+              resetToolbar()
+            }
           }}
           toolbar={{
             inline: {
               className: '!hidden'
             },
             blockType: {
-              dropdownClassName: '!hidden',
               className: '!hidden'
             },
             list: {
@@ -253,43 +331,78 @@ const WriteStory = () => {
             }
           }}
           handleKeyCommand={handleKeyCommand}
-          toolbarClassName={`${!isToolbarOpen && '!hidden'}`}
+          toolbarClassName={`${isToolbarOpen ? 'active' : ''} ${
+            toolbarMode ? toolbarMode : ''
+          }`}
+          customDecorators={[
+            {
+              strategy: findLinkEntities,
+              component: Link
+            }
+          ]}
           toolbarCustomButtons={[
             <CustomButton
               type='BOLD'
               editorState={editorState}
               setEditorState={setEditorState}
               classes=''
+              setToolbarMode={setToolbarMode}
+              getStylesOnSelection={getStylesOnSelection}
+              isSelected={currentSelectedTypes['BOLD']}
             />,
             <CustomButton
               type='ITALIC'
               editorState={editorState}
               setEditorState={setEditorState}
               classes=''
+              setToolbarMode={setToolbarMode}
+              getStylesOnSelection={getStylesOnSelection}
+              isSelected={currentSelectedTypes['ITALIC']}
             />,
             <CustomButton
               type='link'
               editorState={editorState}
               setEditorState={setEditorState}
               classes='border-r border-gray-500 pr-2'
+              setToolbarMode={setToolbarMode}
+              getStylesOnSelection={getStylesOnSelection}
+              isSelected={currentSelectedTypes['link']}
             />,
             <CustomButton
               type='header-three'
               editorState={editorState}
               setEditorState={setEditorState}
               classes=''
+              setToolbarMode={setToolbarMode}
+              getStylesOnSelection={getStylesOnSelection}
+              isSelected={currentSelectedTypes['header-three']}
             />,
             <CustomButton
               type='header-four'
               editorState={editorState}
               setEditorState={setEditorState}
               classes=''
+              setToolbarMode={setToolbarMode}
+              getStylesOnSelection={getStylesOnSelection}
+              isSelected={currentSelectedTypes['header-four']}
             />,
             <CustomButton
               type='blockquote'
               editorState={editorState}
               setEditorState={setEditorState}
               classes=''
+              setToolbarMode={setToolbarMode}
+              getStylesOnSelection={getStylesOnSelection}
+              isSelected={currentSelectedTypes['blockquote']}
+            />,
+            <UrlInput
+              resetToolbar={resetToolbar}
+              focus={toolbarMode === 'link-mode'}
+              editorState={editorState}
+              setEditorState={setEditorState}
+              closeUrlInput={closeUrlInput}
+              getStylesOnSelection={getStylesOnSelection}
+              isToolbarOpen={isToolbarOpen}
             />
           ]}
           {...props}
