@@ -130,6 +130,7 @@ const SidebarTools = forwardRef<Ref, Props>((props, ref) => {
           } else {
             return (
               <animated.div
+                key={index}
                 style={props}
                 className='url-input !block !p-0 w-[32px] h-[32px]'
               >

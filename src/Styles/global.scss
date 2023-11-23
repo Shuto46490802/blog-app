@@ -48,8 +48,7 @@ h6 .h6 {
   @apply flex flex-col items-center pt-8 sm:min-w-[300px] relative after:content-[""] after:w-full after:h-[1px] after:absolute after:bg-black after:left-0 after:bottom-0;
 
   label {
-    @apply text-sm text-gray-400;
-    position: absolute;
+    @apply text-sm text-gray-400 absolute;
     transition: all 0.2s ease-in;
   }
 
@@ -138,16 +137,16 @@ button {
   }
 
   .url-input {
-    display: none;
+    @apply hidden;
   }
 
   &.link-mode {
     .url-input {
-      display: block;
+      @apply block;
     }
 
     .custom-button {
-      display: none;
+      @apply hidden;
     }
   }
 }
@@ -160,11 +159,11 @@ button {
 
 [aria-label*='-control'],
 [aria-label*='-picker'] {
-  display: none !important;
+  @apply hidden;
 }
 
 .public-DraftStyleDefault-block.public-DraftStyleDefault-ltr {
-  margin: 0 !important;
+  @apply m-0;
 }
 
 .sidebar-tools {
@@ -173,12 +172,16 @@ button {
   }
 }
 
+.public-DraftEditorPlaceholder-root {
+  @apply absolute text-gray-400;  
+}
+
 .public-DraftEditorPlaceholder-hasFocus {
-  display: none;
+  @apply hidden;
 }
 
 .sidebar-active {
   .public-DraftEditorPlaceholder-root {
-    display: none;
+    @apply hidden;
   }
 }
