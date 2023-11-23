@@ -22,9 +22,7 @@ const TagsInput = (props: {
   return (
     <div className='flex items-center'>
       <div
-        className={`flex items-center gap-1 text-base ${
-          tags.length && 'pr-2'
-        }`}
+        className={`flex items-center gap-1 text-base ${tags.length && 'pr-2'}`}
       >
         {tags.length > 0 &&
           tags.map((tag, index) => {
@@ -34,7 +32,7 @@ const TagsInput = (props: {
                 key={index}
                 className='bg-green-700 hover:bg-green-900  duration-300 text-white px-2 py-1 rounded-[48px] flex items-center'
               >
-                <span className='mr-1'>{tag}</span>
+                <span className='mr-1 whitespace-nowrap'>{tag}</span>
                 <FontAwesomeIcon icon={faXmark} size='xs' />
               </button>
             )

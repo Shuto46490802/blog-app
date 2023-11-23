@@ -129,10 +129,6 @@ button {
 .rdw-editor-toolbar {
   @apply items-center gap-3 fixed bg-gray-700 text-white m-0 px-3 py-2 rounded z-10 hidden;
 
-  div:first-of-type {
-    display: none !important
-  }
-
   &.active {
     @apply flex;
   }
@@ -169,4 +165,20 @@ button {
 
 .public-DraftStyleDefault-block.public-DraftStyleDefault-ltr {
   margin: 0 !important;
+}
+
+.sidebar-tools {
+  button, .url-input {
+    @apply text-green-700 border border-green-700 flex items-center justify-center p-2 rounded-full;
+  }
+}
+
+.public-DraftEditorPlaceholder-hasFocus {
+  display: none;
+}
+
+.sidebar-active {
+  .public-DraftEditorPlaceholder-root {
+    display: none;
+  }
 }
