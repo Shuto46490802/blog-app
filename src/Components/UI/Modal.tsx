@@ -1,5 +1,5 @@
 // react
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, SetStateAction, useEffect } from 'react'
 
 // library
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -19,11 +19,16 @@ const Modal = (props: {
   isCloseButton: boolean
   setModalType: Dispatch<SetStateAction<string>>
   setIsModalOpen: Dispatch<SetStateAction<boolean>>
+  style?: any
 }) => {
-  const { type, toggleModal, setModalType, classes, isCloseButton, setIsModalOpen } = props
+  const { type, toggleModal, setModalType, classes, isCloseButton, setIsModalOpen, style } = props
+
+  useEffect(() => {
+    return () => setModalType('')
+  }, [])
 
   return (
-    <div className={`absolute bg-white z-10  ${classes}`}>
+    <div style={style} className={`absolute bg-white z-10  ${classes}`}>
       <Card classes='w-full h-full flex items-center justify-center relative'>
         <>
           {isCloseButton && (

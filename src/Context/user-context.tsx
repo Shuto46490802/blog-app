@@ -31,6 +31,7 @@ type ContextType = {
   loginModalType: string
   setLoginModalType: Dispatch<SetStateAction<string>>
   toggleLoginModal: Function
+  loginModalTransition: any
   handleGoogleSignin: Function
   handleSignInEmailPassword: Function
   handleSignInEmail: Function
@@ -46,6 +47,7 @@ const UserContext = createContext<ContextType>({
   loginModalType: '',
   setLoginModalType: () => {},
   toggleLoginModal: () => {},
+  loginModalTransition: () => {},
   handleGoogleSignin: () => {},
   handleSignInEmailPassword: () => {},
   handleSignInEmail: () => {},
@@ -62,7 +64,8 @@ export const UserProvider = (props: { children: JSX.Element }) => {
     modalType: loginModalType,
     setModalType: setLoginModalType,
     setIsModalOpen: setIsLoginModalOpen,
-    toggleModal: toggleLoginModal
+    toggleModal: toggleLoginModal,
+    transition: loginModalTransition
   } = useModal()
   const navigate = useNavigate()
 
@@ -211,6 +214,7 @@ export const UserProvider = (props: { children: JSX.Element }) => {
         loginModalType,
         setLoginModalType,
         toggleLoginModal,
+        loginModalTransition,
 
         handleGoogleSignin,
         handleSignInEmailPassword,
